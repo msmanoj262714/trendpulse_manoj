@@ -1,0 +1,31 @@
+import pandas as pd
+
+
+df = pd.read_json("data/trends_2026-04-06.json")
+
+# 1) Remove duplicate rows using post_id
+df = df.drop_duplicates(subset="post_id")
+
+# 2) Drop rows with missing important values
+df = df.dropna(subset=["post_id", "title", "score"])
+
+# 3) Fix data types
+df["score"] = df["score"].astype(int)
+df["num_comments"] = df["num_comments"].fillna(0).astype(int)
+
+# 4) Remove low quality stories
+df = df[df["score"] >= 5]
+
+# 5) Remove extra spaces from title
+df["title"] = df["title"].str.strip()
+
+
+# Save cleaned DataFrame
+df.to_csv("data/trends_clean.csv", index=False)
+
+# Print confirmation
+print(f"Saved {len(df)} rows to data/trends_clean.csv")
+
+
+print("\nStories per category:")
+print(df["category"].value_counts())
